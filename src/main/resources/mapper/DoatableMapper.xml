@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//www.mybatis.org//DTD Mapper 3.0//EN"
+        "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.corewell.sqlite.dao.DoatableMapper">
+
+    <resultMap id="DoatableMap" type="com.corewell.sqlite.domain.Doatable">
+        <result property="stime" column="stime"/>
+        <result property="dovalue" column="dovalue"/>
+        <result property="satvalue" column="satvalue"/>
+        <result property="tempvalue" column="tempvalue"/>
+        <result property="phvalue" column="phvalue"/>
+    </resultMap>
+
+    <select id="findOne" resultType="com.corewell.sqlite.domain.Doatable">
+        SELECT * FROM doatable ORDER BY stime DESC LIMIT 1
+    </select>
+
+</mapper>
+
