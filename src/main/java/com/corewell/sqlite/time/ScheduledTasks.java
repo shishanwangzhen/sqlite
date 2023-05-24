@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSON;
 import com.corewell.sqlite.dao.DoatableMapper;
 import com.corewell.sqlite.domain.Doatable;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -35,9 +34,8 @@ public class ScheduledTasks {
     private static final String SEND_SINGLE_INFO_URL = "http://210.12.220.220:8012/dataswitch-sq/sendApi/sendSingleInfo";
     Map<String, String> map1 = new HashMap<>();
     Map<String, Object> map2 = new HashMap<>();
-    HttpHeaders headers = new HttpHeaders();
     DecimalFormat df = new DecimalFormat("0.0");
-
+    private static final String ZERO = "0";
 
     /**
      * 常用表达式例子
@@ -66,17 +64,18 @@ public class ScheduledTasks {
         try {
             Doatable doatable = doatableMapper.findOne();
             System.out.println("参数：：" + JSON.toJSONString(doatable));
-            String hour = doatable.getStime().substring(11, 13);
-            if (hour.startsWith("0")) {
-                hour.replace("0", "");
+            String stime = doatable.getStime();
+            String hour = stime.substring(11, 13);
+            if (hour.startsWith(ZERO)) {
+                hour.replace(ZERO, "");
             }
-            String min = doatable.getStime().substring(14, 16);
-            if (min.startsWith("0")) {
-                min.replace("0", "");
+            String min = stime.substring(14, 16);
+            if (min.startsWith(ZERO)) {
+                min.replace(ZERO, "");
             }
-            String s = doatable.getStime().substring(17);
-            if (s.startsWith("0")) {
-                s.replace("0", "");
+            String s = stime.substring(17);
+            if (s.startsWith(ZERO)) {
+                s.replace(ZERO, "");
             }
             System.out.println("时分秒: " + hour + ":" + min + ":" + s);
 
@@ -87,47 +86,34 @@ public class ScheduledTasks {
             String waterTemp = df.format(tempvalue * (n * 0.1 + 0.95));
             String ph = df.format(phvalue * (n * 0.1 + 0.95));
             String dissolveO = df.format(dovalue * (n * 0.1 + 0.95));
-            map1.put("waterTemp", waterTemp);
-            map1.put("ph", ph);
-            map1.put("dissolveO", dissolveO);
-
-            map2.put("deviceId", "KWCARXCJ0A211101");
-            map2.put("sessionKey", "121345");
-            map2.put("data", map1);
-            System.out.println("KWCARXCJ0A211101参数："+map2);
-            ResponseEntity<String> response1 = restTemplate.postForEntity(SEND_SINGLE_INFO_URL, new HttpEntity<Map>(map2, null), String.class);
-            System.out.println(response1.getBody());
+            sendSingleInfo(waterTemp, ph, dissolveO, "KWCARXCJ0A211101");
 
             waterTemp = df.format(tempvalue * (n * 0.1 + 1.1));
             ph = df.format(phvalue * (n * 0.1 + 1.1));
             dissolveO = df.format(dovalue * (n * 0.1 + 1.1));
-            map1.put("waterTemp", waterTemp);
-            map1.put("ph", ph);
-            map1.put("dissolveO", dissolveO);
-
-            map2.put("deviceId", "KWCARXCJ0A211102");
-            map2.put("sessionKey", "121345");
-            map2.put("data", map1);
-            System.out.println("KWCARXCJ0A211102参数："+map2);
-            ResponseEntity<String> response2 = restTemplate.postForEntity(SEND_SINGLE_INFO_URL, new HttpEntity<Map>(map2, null), String.class);
-            System.out.println(response2.getBody());
+            sendSingleInfo(waterTemp, ph, dissolveO, "KWCARXCJ0A211102");
 
             waterTemp = df.format(tempvalue * (n * 0.12 + 0.94));
             ph = df.format(phvalue * (n * 0.12 + 0.94));
             dissolveO = df.format(dovalue * (n * 0.12 + 0.94));
-            map1.put("waterTemp", waterTemp);
-            map1.put("ph", ph);
-            map1.put("dissolveO", dissolveO);
-
-            map2.put("deviceId", "KWCARXCJ0A211104");
-            map2.put("sessionKey", "121345");
-            map2.put("data", map1);
-            System.out.println("KWCARXCJ0A211103参数："+map2);
-            ResponseEntity<String> response3 = restTemplate.postForEntity(JIANG_NING_URL, new HttpEntity<Map>(map2, null), String.class);
-            System.out.println(response3.getBody());
+            sendSingleInfo(waterTemp, ph, dissolveO, "KWCARXCJ0A211104");
         } catch (Exception e) {
             System.out.println(e);
         }
+
+    }
+
+    private void sendSingleInfo(String waterTemp, String ph, String dissolveO, String deviceId) {
+        map1.put("waterTemp", waterTemp);
+        map1.put("ph", ph);
+        map1.put("dissolveO", dissolveO);
+
+        map2.put("deviceId", deviceId);
+        map2.put("sessionKey", "121345");
+        map2.put("data", map1);
+        System.out.println("参数：：" + map2);
+        ResponseEntity<String> response1 = restTemplate.postForEntity(SEND_SINGLE_INFO_URL, new HttpEntity<Map>(map2, null), String.class);
+        System.out.println(response1);
 
     }
 }

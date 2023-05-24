@@ -9,9 +9,8 @@ import org.apache.ibatis.annotations.Mapper;
 @Mapper
 public interface DoatableMapper {
     /**
+     * 查询最新一条数据
      * @return
-     *
-     *查询最新一条数据
      *
      *
     * */
